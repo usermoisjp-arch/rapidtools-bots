@@ -84,6 +84,15 @@ TIPS = [
     "the setup steps are public in <#1562177908179738626> if you want to see how it works before buying",
 ]
 
+# Teasers des prochains outils (pas de bouton d'achat : rien à acheter encore)
+TEASERS = [
+    "RapidCc's drop <t:1793469600:R>. our color correction presets, as LUTs. <#1562463197120823338>",
+    "RapidQualityPresets, our Topaz Video presets, are out <t:1794074400:R> <#1562463199050342521>",
+    "RapidScenes makes scene packs without the manual work: drop your video, pick the characters. <t:1794679200:R> <#1562463200585322637>",
+    "RapidCaptions, caption presets and 3D text for After Effects, is coming <t:1795284000:R>. <#1562463202107990076>",
+    "which one are you waiting for? RapidCc's, RapidQualityPresets, RapidScenes or RapidCaptions?",
+]
+
 # Questions pour faire parler les gens : pas de bouton d'achat
 QUESTIONS = [
     "what are you editing with these days? CapCut, AE, something else?",
@@ -108,7 +117,8 @@ MESSAGES |= {f"n{i}": m for i, m in enumerate(NUDGE)}
 MESSAGES |= {f"r{i}": m for i, m in enumerate(REVIEWS)}
 MESSAGES |= {f"t{i}": m for i, m in enumerate(TIPS)}
 MESSAGES |= {f"q{i}": m for i, m in enumerate(QUESTIONS)}
-NO_BUTTON = ("t", "q")  # astuces et questions : pas de bouton d'achat
+MESSAGES |= {f"c{i}": m for i, m in enumerate(TEASERS)}
+NO_BUTTON = ("t", "q", "c")  # astuces et questions : pas de bouton d'achat
 
 
 def load(path: Path, default: dict) -> dict:
