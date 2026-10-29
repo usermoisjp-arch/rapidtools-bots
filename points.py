@@ -11,6 +11,11 @@ from pathlib import Path
 POINTS = Path(__file__).resolve().parent / "points.json"
 CRON_URL = "https://rapidtools-bot.vercel.app/api/cron"
 
+if not os.environ.get("CRON_SECRET"):
+    # Secret pas encore ajouté au dépôt : on attend sans faire échouer le workflow (pas de mail d'échec)
+    print("CRON_SECRET absent : rien à faire")
+    raise SystemExit(0)
+
 state = json.loads(POINTS.read_text()) if POINTS.exists() else {}
 req = urllib.request.Request(
     CRON_URL,
