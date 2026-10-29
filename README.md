@@ -23,3 +23,14 @@ Même workflow (`promo.yml`). Une annonce tous les 4 à 7 jours, entre 17 h et 2
 - Tester sans ping dans #staff-chat : `DISCORD_TEST_WEBHOOK_URL=... python announce.py --test --key video`.
 
 - Vidéos à exclure : variable GitHub `BANNED_IDS` (privée) ; en local `banned.txt` (ignoré par git).
+
+## XP et classement (points.py)
+
+`.github/workflows/points.yml`, toutes les 10 min : `points.py` envoie `points.json` au bot (Vercel, `/api/cron`), qui relit les nouveaux messages des salons de discussion, compte l'XP (+5 par message, une fois par minute ; +2 pour une réponse à quelqu'un ; +10 pour le premier message du jour ; staff exclu), donne les rôles Level 5/10/20/30, annonce les passages de niveau dans #general et met à jour #leaderboard. Le nouvel état revient ici et est commité. Le token du bot reste sur Vercel. Secret : `CRON_SECRET` (même valeur que sur Vercel). Code : `bot/lib/community.js` du projet RapidTools.
+
+## Giveaways (giveaway.py)
+
+`giveaways.json` liste les giveaways (lot, `draw` en timestamp Unix, salon et message où réagir 🎉, salon où réclamer le lot). `.github/workflows/giveaway.yml` tourne toutes les heures à :45 et ne fait rien sauf si un tirage tombe dans les 80 min. Alors : rappel dans #general 1 h avant, dans #giveaways 10 min avant, liste des participants demandée au bot 1 min avant (1 ticket, 2 au niveau 5, 3 au niveau 10), tirage `secrets`, roue GIF postée à la seconde près, gagnant annoncé quand elle s'arrête, message du giveaway marqué terminé, staff prévenu dans #staff-chat. État : `giveaway_state.json`. Secrets : `CRON_SECRET`, `DISCORD_GIVEAWAY_WEBHOOK_URL`, `DISCORD_PROMO_WEBHOOK_URL`.
+
+- Nouveau giveaway : poster son message dans #giveaways (`config/site.json` > giveaways puis `npm run messages -- giveaways` dans RapidTools), ajouter la réaction 🎉, puis une entrée dans `giveaways.json` avec l'ID du message.
+- Voir la roue sans rien poster : `python giveaway.py --gif-test` (crée `wheel-test.gif`).

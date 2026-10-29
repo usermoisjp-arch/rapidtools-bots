@@ -1,0 +1,73 @@
+name: Giveaways
+
+# Toutes les heures à :45 ; giveaway.py ne fait rien sauf si un tirage tombe dans les 80 min (giveaways.json).
+# Il attend alors l'heure pile, poste la roue et le gagnant. Plusieurs passages possibles : seul le premier tire.
+on:
+  schedule:
+    - cron: "45 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: giveaway
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      # Seul paquet : Pillow (roue), version figée, binaire officiel
+      - run: pip install --only-binary :all: pillow==12.2.0
+      - name: Tirage si c'est l'heure
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          DISCORD_GIVEAWAY_WEBHOOK_URL: ${{ secrets.DISCORD_GIVEAWAY_WEBHOOK_URL }}
+          DISCORD_PROMO_WEBHOOK_URL: ${{ secrets.DISCORD_PROMO_WEBHOOK_URL }}
+        run: python giveaway.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: giveaway
+          path: giveaway_state.json
+          retention-days: 1
+
+  save:
+    needs: run
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          name: giveaway
+          path: incoming
+      - name: Sauvegarder l'état
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f incoming/giveaway_state.json ] || exit 0
+          python3 -I -c 'import json,sys; json.load(open(sys.argv[1]))' incoming/giveaway_state.json
+          cp incoming/giveaway_state.json giveaway_state.json
+          git config user.name "rapidtools-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add giveaway_state.json
+          git diff --cached --quiet && exit 0
+          git commit -m "giveaway [skip ci]"
+          git pull --rebase "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
