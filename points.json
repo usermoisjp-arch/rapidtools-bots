@@ -1,7 +1,7 @@
 {
  "board": {
   "message": "1565363052701028464",
-  "sig": "Nobody yet. Send a message in the chat channels to get on the board.|0|[]"
+  "sig": "Nobody yet. Send a message in the chat channels to get on the board.|0|[[\"912439381837611009\",0]]"
  },
  "cursors": {
   "1550435120295444560": "1565636239015809145",
@@ -14,7 +14,9 @@
   "1563178382361886800": "1565363044668669952",
   "1563178392952508517": "1565363044668669952"
  },
- "invites": {},
+ "invites": {
+  "912439381837611009": 0
+ },
  "rewards": {},
  "since": 1793282032888,
  "users": {},
