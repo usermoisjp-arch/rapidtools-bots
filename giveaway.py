@@ -92,7 +92,7 @@ def label(p: dict) -> str:
     for raw in (p.get("name"), p.get("username")):
         s = "".join(c for c in str(raw or "") if 32 <= ord(c) < 0x250).strip()
         if len(s) >= 2:
-            return s if len(s) <= 14 else s[:13] + "…"
+            return s if len(s) <= 20 else s[:19] + "…"
     return "member"
 
 
@@ -138,7 +138,7 @@ def wheel_image(people: list[dict], size: int) -> tuple[Image.Image, list[tuple[
     return img.resize((size, size), Image.LANCZOS), spans
 
 
-def render(people: list[dict], winner: int, title: str, logo: Path | None, fps: int = 20) -> tuple[bytes, float]:
+def render(people: list[dict], winner: int, title: str, logo: Path | None, fps: int = 20, banner: str = "WINNER") -> tuple[bytes, float]:
     """GIF de la roue qui tourne et s'arrête sur le gagnant. Renvoie (octets, durée de la rotation en s)."""
     W, H, S = 520, 600, 440
     cx, cy = W // 2, 92 + S // 2
@@ -182,7 +182,7 @@ def render(people: list[dict], winner: int, title: str, logo: Path | None, fps: 
         ease = 1 - (1 - t) ** 4  # démarre vite, ralentit longuement
         frames.append(frame(final * ease))
         durations.append(1000 // fps)
-    win = f"WINNER: {label(people[winner])}"
+    win = f"{banner}: {label(people[winner])}"
     frames.append(frame(final, win))
     durations.append(60000)  # reste affiché
 
@@ -272,6 +272,45 @@ def draw(g: dict, st: dict) -> None:
         print(f"! message au staff : {e}")
 
 
+# ---------- Récompense d'invitations ----------
+# points.json > rewards : nombre de tours gagnés par membre (toutes les 15 personnes venues par son lien,
+# compté par le bot). giveaway_state.json > spun : tours déjà joués. Chaque tour manquant = une roue des produits.
+
+def reward_spins(st: dict) -> None:
+    cfg = load(ROOT / "rewards.json", {})
+    earned = load(POINTS, {}).get("rewards", {})
+    spun = st.setdefault("spun", {})
+    for uid, n in earned.items():
+        while spun.get(uid, 0) < n:
+            prizes = cfg["prizes"]
+            k = secrets.randbelow(len(prizes))
+            people = [{"name": p["name"], "entries": 1} for p in prizes]
+            gif = b""
+            for fps in (20, 14, 10):
+                gif, spin = render(people, k, "Invite reward", ROOT / "assets/logo.jpeg", fps, banner="WON")
+                if len(gif) < 9.5e6:
+                    break
+            done = spun.get(uid, 0) + 1
+            webhook("DISCORD_GIVEAWAY_WEBHOOK_URL", {
+                "content": f"🎡 <@{uid}> brought **{done * cfg['goal']} people** to the server! Spinning the product wheel...",
+                "allowed_mentions": {"users": [uid]},
+            }, {"wheel.gif": gif})
+            time.sleep(spin + 0.5)
+            p = prizes[k]
+            when = f" It drops <t:{p['release']}:D>, you get it on release day." if p.get("release", 0) > time.time() else ""
+            webhook("DISCORD_GIVEAWAY_WEBHOOK_URL", {
+                "content": f"🎉 <@{uid}> won **{p['name']}** for free!{when}\nClaim it with **Contact the team** in <#{cfg['claim_channel']}>. The team checks the invites first.",
+                "allowed_mentions": {"users": [uid]},
+            })
+            try:
+                cron({"task": "result", "prize": f"{p['name']} (invite reward, {done * cfg['goal']} invites)", "winner": uid, "participants": 0, "entries": 1})
+            except Exception as e:
+                print(f"! message au staff : {e}")
+            spun[uid] = done
+            STATE.write_text(json.dumps(st, indent=2) + "\n")
+            print("1 tour de roue d'invitations joué")
+
+
 def main() -> None:
     if "--gif-test" in sys.argv:
         fake = [{"id": str(i), "name": n, "entries": e} for i, (n, e) in enumerate([("Nora", 1), ("Pce.aep", 2), ("Ryn", 1), ("TERMINATOR", 3), ("alex_edits", 1), ("Ma😀rco", 1), ("kaiedits.ae", 2), ("Lina", 1), ("vfx.sam", 1), ("ゆき", 1)])]
@@ -279,10 +318,18 @@ def main() -> None:
             p["username"] = "yuki" if p["name"] == "ゆき" else p["name"]
         gif, _ = render(fake, 3, "RapidCc's giveaway", ROOT / "assets/logo.jpeg")
         (ROOT / "wheel-test.gif").write_bytes(gif)
+        prizes = [{"name": p["name"], "entries": 1} for p in load(ROOT / "rewards.json", {})["prizes"]]
+        (ROOT / "wheel-test-rewards.gif").write_bytes(render(prizes, 3, "Invite reward", ROOT / "assets/logo.jpeg", banner="WON")[0])
         print(f"wheel-test.gif : {len(gif) // 1024} Ko")
         return
 
     st = load(STATE, {})
+    try:
+        reward_spins(st)
+    except Exception as e:
+        print(f"! roue d'invitations : {e}")
+    finally:
+        STATE.write_text(json.dumps(st, indent=2) + "\n")
     now = time.time()
     due = [g for g in load(CONFIG, []) if not st.get(g["id"], {}).get("drawn") and g.get("message") and -86400 < g["draw"] - now < 80 * 60]
     if not due:

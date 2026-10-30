@@ -1,0 +1,12 @@
+{
+  "goal": 15,
+  "channel": "1565356814411898880",
+  "claim_channel": "1562177895860797603",
+  "prizes": [
+    {"name": "Rapid Quality"},
+    {"name": "RapidCc's", "release": 1793469600},
+    {"name": "RapidQualityPresets", "release": 1794074400},
+    {"name": "RapidScenes", "release": 1794679200},
+    {"name": "RapidCaptions", "release": 1795284000}
+  ]
+}

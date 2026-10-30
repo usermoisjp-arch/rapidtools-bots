@@ -93,6 +93,17 @@ TEASERS = [
     "which one are you waiting for? RapidCc's, RapidQualityPresets, RapidScenes or RapidCaptions?",
 ]
 
+# Récompense d'invitations (demande de Joris, 2026-10-30) : au moins un message par jour (INVITE_EVERY_H).
+# Lien personnel via le bouton de #giveaways ou /invites ; 15 personnes = un tour de la roue des produits.
+INVITES = [
+    "know editors who'd want their uploads sharp? grab your own invite link in <#1565356814411898880> (or type /invites). every 15 people who join with it = a free spin of the product wheel",
+    "free Rapid Quality, RapidCc's, RapidScenes and more are on the wheel. bring 15 editor friends with your invite link from <#1565356814411898880> and you spin it",
+    "your editor friends complain about TikTok blurring their edits? send them your invite link (/invites). 15 joins and you spin the product wheel",
+    "invite race is on: check the top inviters in <#1565356816223961258>. 15 people with your link = one free product off the wheel in <#1565356814411898880>",
+    "type /invites to get your link and see how many people joined with it. at 15 the wheel spins for you, live in <#1565356814411898880>",
+]
+INVITE_EVERY_H = 24
+
 # Questions pour faire parler les gens : pas de bouton d'achat
 QUESTIONS = [
     "what are you editing with these days? CapCut, AE, something else?",
@@ -118,7 +129,8 @@ MESSAGES |= {f"r{i}": m for i, m in enumerate(REVIEWS)}
 MESSAGES |= {f"t{i}": m for i, m in enumerate(TIPS)}
 MESSAGES |= {f"q{i}": m for i, m in enumerate(QUESTIONS)}
 MESSAGES |= {f"c{i}": m for i, m in enumerate(TEASERS)}
-NO_BUTTON = ("t", "q", "c")  # astuces et questions : pas de bouton d'achat
+MESSAGES |= {f"i{i}": m for i, m in enumerate(INVITES)}
+NO_BUTTON = ("t", "q", "c", "i")  # astuces et questions : pas de bouton d'achat
 
 
 def load(path: Path, default: dict) -> dict:
@@ -141,6 +153,12 @@ def pick(state: dict) -> tuple[str, str, dict | None]:
     video_keys = [k for k in keys if k.startswith("v")]
     other_keys = [k for k in keys if not k.startswith("v")]
     key = FORCED_KEY or random.choice(video_keys if video_keys and (random.random() < 0.35 or not other_keys) else other_keys)
+    # Invitations : un message par jour au moins, en plus du tirage normal
+    invite_keys = [k for k in MESSAGES if k.startswith("i") and k not in state["recent"][-len(INVITES) + 1:]]
+    if not FORCED_KEY and time.time() - state.get("invite_last", 0) >= INVITE_EVERY_H * 3600 and invite_keys:
+        key = random.choice(invite_keys)
+    if key.startswith("i"):
+        state["invite_last"] = time.time()
     video = None
     if key.startswith("v") and videos:
         fresh = [v for v in videos if v["url"] not in state["recent_videos"]] or videos

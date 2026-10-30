@@ -37,6 +37,7 @@ HANDLE = "snzzedit"
 GAP_DAYS = (4, 7)
 HOURS_UTC = range(17, 20)
 RECENT = 3
+INVITE_EVERY_D = 7
 COLOR = 0x22D3EE
 FOOTER = {"text": "Rapid Quality · Not affiliated with TikTok", "icon_url": "attachment://logo.jpeg"}
 
@@ -108,6 +109,19 @@ ANNOUNCEMENTS = {
             "Want a ping when each one drops? Pick **Yes, ping me** in **Channels & Roles**."
         ),
     },
+    # Récompense d'invitations (demande de Joris, 2026-10-30) : au moins une fois par semaine (INVITE_EVERY_D)
+    "invites": {
+        "ping": "invite your editor friends, win a product 📨",
+        "image": "giveaway",
+        "title": "15 invites = a free spin of the product wheel",
+        "description": (
+            "Get your own invite link in <#1565356814411898880> (button **Get my invite link**) or type `/invites` anywhere.\n\n"
+            "Send it to editors who'd like Rapid Quality or the tools on the way. Every **15 people** who join with your link = "
+            "**one spin of the product wheel**, live in <#1565356814411898880>: Rapid Quality, RapidCc's, RapidQualityPresets, "
+            "RapidScenes or RapidCaptions, free.\n\n"
+            "Top inviters are in <#1565356816223961258>. Only real people count, the team checks every win."
+        ),
+    },
     "how-it-works": {
         "ping": "how it works, in case you were wondering",
         "image": "ba",
@@ -140,6 +154,9 @@ def build(key: str) -> tuple[dict, list[tuple[str, bytes]]]:
     elif a["image"] == "coming-soon":
         files.append(("coming-soon.jpg", (ROOT / "assets/coming-soon.jpg").read_bytes()))
         embed["image"] = {"url": "attachment://coming-soon.jpg"}
+    elif a["image"] == "giveaway":
+        files.append(("invites.jpg", (ROOT / "assets/invites.jpg").read_bytes()))
+        embed["image"] = {"url": "attachment://invites.jpg"}
     elif a["image"] == "site":
         embed["image"] = {"url": SITE_IMAGE}
     elif a["image"] == "video":
@@ -174,6 +191,8 @@ def main() -> int:
 
     fresh = [k for k in ANNOUNCEMENTS if k not in state["recent"]] or list(ANNOUNCEMENTS)
     keys = [FORCED_KEY] if FORCED_KEY else random.sample(fresh, k=len(fresh))
+    if not FORCED_KEY and now - state.get("invite_last", 0) >= INVITE_EVERY_D * 86400:
+        keys = ["invites"] + [k for k in keys if k != "invites"]
     for key in keys:
         try:
             payload, files = build(key)
@@ -186,6 +205,8 @@ def main() -> int:
         webhook = os.environ["DISCORD_TEST_WEBHOOK_URL" if TEST else "DISCORD_ANNOUNCE_WEBHOOK_URL"]
         send(payload, files=files, webhook=webhook)
         if not TEST:
+            if key == "invites":
+                state["invite_last"] = now
             state.update(last=now, gap_d=round(random.uniform(*GAP_DAYS), 2), recent=(state["recent"] + [key])[-RECENT:])
             STATE.write_text(json.dumps(state, indent=2) + "\n")
             print(f"prochaine annonce dans {state['gap_d']} jours")
