@@ -72,6 +72,7 @@ NUDGE = [
     "anime line art, faces, text on screen. that's usually the first stuff TikTok blurs",
     "it's PC only for now (Chrome, Edge, Brave). if you edit on a computer and post on TikTok, it's for you",
     "check <#1550435122564567220> if you want to see the same clip with and without it",
+    "customers write their own reviews in <#1566740622713425993>. go read what people say after using it",
 ]
 
 # Astuces tirées du guide d'installation, utiles à tous : pas de bouton d'achat
