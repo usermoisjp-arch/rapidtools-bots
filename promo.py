@@ -191,6 +191,10 @@ def build(text: str, video: dict | None, sell: bool = True) -> tuple[dict, bytes
 
 
 def main() -> int:
+    # Extension en panne : pas de message de vente (créer ou supprimer le fichier PAUSE_SALES)
+    if (ROOT / "PAUSE_SALES").exists() and not (DRY or FORCED_KEY):
+        print("pause : PAUSE_SALES présent, aucun message")
+        return 0
     state = load(STATE, {"last": 0, "gap_h": 0, "recent": [], "recent_videos": []})
     now = time.time()
     due = now - state["last"] >= state["gap_h"] * 3600 and time.gmtime(now).tm_hour in HOURS_UTC
