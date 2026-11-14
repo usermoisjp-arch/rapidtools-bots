@@ -98,11 +98,10 @@ ANNOUNCEMENTS = {
     },
     # Teaser des prochains outils : dates de config/site.json (launches), décrits d'après Joris
     "coming-soon": {
-        "ping": "4 new tools are on the way 👀",
+        "ping": "3 new tools are on the way 👀",
         "image": "coming-soon",
         "title": "Coming soon to RapidTools",
         "description": (
-            "🎨 **RapidCc's**: our color correction presets, as LUTs. <#1562463197120823338> · <t:1793901600:R>\n"
             "🤖 **RapidQualityPresets**: the presets we use in Topaz Video. <#1562463199050342521> · <t:1794074400:R>\n"
             "🎬 **RapidScenes**: drop your video, pick the characters, get the packs. <#1562463200585322637> · <t:1794679200:R>\n"
             "✍️ **RapidCaptions**: caption presets and 3D text for After Effects. <#1562463202107990076> · <t:1795284000:R>\n\n"
