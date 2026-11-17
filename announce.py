@@ -102,9 +102,9 @@ ANNOUNCEMENTS = {
         "image": "coming-soon",
         "title": "Coming soon to RapidTools",
         "description": (
-            "🤖 **RapidQualityPresets**: the presets we use in Topaz Video. <#1562463199050342521> · <t:1794074400:R>\n"
-            "🎬 **RapidScenes**: drop your video, pick the characters, get the packs. <#1562463200585322637> · <t:1794679200:R>\n"
-            "✍️ **RapidCaptions**: caption presets and 3D text for After Effects. <#1562463202107990076> · <t:1795284000:R>\n\n"
+            "🤖 **RapidQualityPresets**: the presets we use in Topaz Video. <#1562463199050342521> · <t:1796493600:R>\n"
+            "🎬 **RapidScenes**: drop your video, pick the characters, get the packs. <#1562463200585322637> · <t:1797098400:R>\n"
+            "✍️ **RapidCaptions**: caption presets and 3D text for After Effects. <#1562463202107990076> · <t:1797703200:R>\n\n"
             "Want a ping when each one drops? Pick **Yes, ping me** in **Channels & Roles**."
         ),
     },

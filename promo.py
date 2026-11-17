@@ -88,9 +88,9 @@ TIPS = [
 # Teasers des prochains outils (pas de bouton d'achat : rien à acheter encore)
 TEASERS = [
     "RapidCc's is out: 10 After Effects color correction presets, the CC from our own edits, €5.99 https://rapidquality.store/products/rapid-ccs",
-    "RapidQualityPresets, our Topaz Video presets, are out <t:1794074400:R> <#1562463199050342521>",
-    "RapidScenes makes scene packs without the manual work: drop your video, pick the characters. <t:1794679200:R> <#1562463200585322637>",
-    "RapidCaptions, caption presets and 3D text for After Effects, is coming <t:1795284000:R>. <#1562463202107990076>",
+    "RapidQualityPresets, our Topaz Video presets, are out <t:1796493600:R> <#1562463199050342521>",
+    "RapidScenes makes scene packs without the manual work: drop your video, pick the characters. <t:1797098400:R> <#1562463200585322637>",
+    "RapidCaptions, caption presets and 3D text for After Effects, is coming <t:1797703200:R>. <#1562463202107990076>",
     "which one are you waiting for? RapidQualityPresets, RapidScenes or RapidCaptions?",
 ]
 
